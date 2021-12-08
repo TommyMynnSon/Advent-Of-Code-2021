@@ -17,7 +17,7 @@ lineReader.on('line', (line) => {
 
 // Once reading each line of puzzle-input.txt is done,
 // call countDepthIncreases with now-populated depths
-// array as argument and ouput its return value (the answer).
+// array as argument and output its return value (the answer).
 lineReader.on('close', () => {
   console.log(countDepthIncreases(depths));
 });
