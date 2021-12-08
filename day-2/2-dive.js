@@ -4,7 +4,8 @@ import { createReadStream } from 'fs';
 // Will be updated as input is read from puzzle-input.txt.
 const tally = {
   depth: 0,
-  horizontalPosition: 0
+  horizontalPosition: 0,
+  aim: 0
 };
 
 // Create interface for reading data from puzzle-input.txt.
@@ -17,15 +18,16 @@ const lineReader = createInterface({
 // and its magnitude.
 lineReader.on('line', (line) => {
   if (line.includes('up')) {
-    tally.depth -= (parseInt(line.substr(-1)));
+    tally.aim -= (parseInt(line.substr(-1)));
   }
 
   if (line.includes('down')) {
-    tally.depth += (parseInt(line.substr(-1)));
+    tally.aim += (parseInt(line.substr(-1)));
   }
 
   if (line.includes('forward')) {
     tally.horizontalPosition += (parseInt(line.substr(-1)));
+    tally.depth += (tally.aim * parseInt(line.substr(-1)));
   }
 });
 
