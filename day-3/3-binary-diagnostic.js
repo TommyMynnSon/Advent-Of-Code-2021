@@ -23,8 +23,11 @@ const mostCommonBits = {
   '8': 0,
   '9': 0,
   '10': 0,
-  '11': 0,
+  '11': 0
 };
+
+// Will be populated with data from puzzle-input.txt.
+let binaryNumbers = [];
 
 // Create interface for reading data from puzzle-input.txt.
 const lineReader = createInterface({
@@ -32,6 +35,8 @@ const lineReader = createInterface({
 });
 
 lineReader.on('line', (line) => {
+  binaryNumbers.push(line);
+
   for (let i = 0; i < line.length; i++) {
     if (line[i] === '0') {
       mostCommonBits[i]--;
@@ -44,7 +49,9 @@ lineReader.on('line', (line) => {
 });
 
 lineReader.on('close', () => {
-  console.log(getGammaRate() * getEpsilonRate());
+  console.log('mostCommonBits:', mostCommonBits);
+  console.log('Power consumption of the submarine:', getGammaRate() * getEpsilonRate());
+  console.log('Life support rating:', getOxygenGeneratorRating() * getCO2ScrubberRating());
 });
 
 // Logic to convert values of the mostCommonBits object
@@ -93,7 +100,7 @@ const convertBinaryRepresentationToDecimalValue = (binaryRepresentation) => {
 
 // Logic to calculate and get the gamma rate.
 //
-// Note: did not reduce coupling with parameters for cleaner code
+// Note: did not reduce coupling with parameters for cleaner code,
 //       and the helper functions above are readable enough to
 //       understand what is going on in this function.
 const getGammaRate = () => {
@@ -105,7 +112,7 @@ const getGammaRate = () => {
 
 // Logic to calculate and get the epsilon rate.
 //
-// Note: did not reduce coupling with parameters for cleaner code
+// Note: did not reduce coupling with parameters for cleaner code,
 //       and the helper functions above are readable enough to
 //       understand what is going on in this function.
 const getEpsilonRate = () => {
@@ -113,4 +120,108 @@ const getEpsilonRate = () => {
   const decimalValue = convertBinaryRepresentationToDecimalValue(leastCommonBitsBinaryRepresentation);
 
   return decimalValue;
+};
+
+// Logic to calculate oxygen generator rating.
+//
+// Note: did not reduce coupling with parameters.
+const getOxygenGeneratorRating = () => {
+  let filtered = [...binaryNumbers];
+
+  const mostCommonBitsPerFilter = { ...mostCommonBits }
+
+  for (let position = 0; position < 12; position++) {
+    if (mostCommonBitsPerFilter[position] >= 0) {
+      filtered = filtered.filter((binaryNumber) => {
+        return binaryNumber[parseInt(position)] === '1';
+      });
+    }
+
+    if (mostCommonBitsPerFilter[position] < 0) {
+      filtered = filtered.filter((binaryNumber) => {
+        return binaryNumber[parseInt(position)] === '0';
+      });
+    }
+
+    if (filtered.length === 1) {
+      return convertBinaryRepresentationToDecimalValue(filtered[0]);
+    }
+
+    mostCommonBitsPerFilter['0'] = 0;
+    mostCommonBitsPerFilter['1'] = 0;
+    mostCommonBitsPerFilter['2'] = 0;
+    mostCommonBitsPerFilter['3'] = 0;
+    mostCommonBitsPerFilter['4'] = 0;
+    mostCommonBitsPerFilter['5'] = 0;
+    mostCommonBitsPerFilter['6'] = 0;
+    mostCommonBitsPerFilter['7'] = 0;
+    mostCommonBitsPerFilter['8'] = 0;
+    mostCommonBitsPerFilter['9'] = 0;
+    mostCommonBitsPerFilter['10'] = 0;
+    mostCommonBitsPerFilter['11'] = 0;
+
+    filtered.forEach((binaryNumber) => {
+      for (let i = 0; i < binaryNumber.length; i++) {
+        if (binaryNumber[i] === '0') {
+          mostCommonBitsPerFilter[i]--;
+        }
+
+        if (binaryNumber[i] === '1') {
+          mostCommonBitsPerFilter[i]++;
+        }
+      }
+    });
+  }
+};
+
+// Logic to calculate CO2 scrubber rating.
+//
+// Note: did not reduce coupling with parameters.
+const getCO2ScrubberRating = () => {
+  let filtered = [...binaryNumbers];
+
+  const mostCommonBitsPerFilter = { ...mostCommonBits }
+
+  for (let position = 0; position < 12; position++) {
+    if (mostCommonBitsPerFilter[position] >= 0) {
+      filtered = filtered.filter((binaryNumber) => {
+        return binaryNumber[parseInt(position)] === '0';
+      });
+    }
+
+    if (mostCommonBitsPerFilter[position] < 0) {
+      filtered = filtered.filter((binaryNumber) => {
+        return binaryNumber[parseInt(position)] === '1';
+      });
+    }
+
+    if (filtered.length === 1) {
+      return convertBinaryRepresentationToDecimalValue(filtered[0]);
+    }
+
+    mostCommonBitsPerFilter['0'] = 0;
+    mostCommonBitsPerFilter['1'] = 0;
+    mostCommonBitsPerFilter['2'] = 0;
+    mostCommonBitsPerFilter['3'] = 0;
+    mostCommonBitsPerFilter['4'] = 0;
+    mostCommonBitsPerFilter['5'] = 0;
+    mostCommonBitsPerFilter['6'] = 0;
+    mostCommonBitsPerFilter['7'] = 0;
+    mostCommonBitsPerFilter['8'] = 0;
+    mostCommonBitsPerFilter['9'] = 0;
+    mostCommonBitsPerFilter['10'] = 0;
+    mostCommonBitsPerFilter['11'] = 0;
+
+    filtered.forEach((binaryNumber) => {
+      for (let i = 0; i < binaryNumber.length; i++) {
+        if (binaryNumber[i] === '0') {
+          mostCommonBitsPerFilter[i]--;
+        }
+
+        if (binaryNumber[i] === '1') {
+          mostCommonBitsPerFilter[i]++;
+        }
+      }
+    });
+  }
 };
