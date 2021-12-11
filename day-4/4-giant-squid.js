@@ -13,6 +13,9 @@ let bingoBoardCounter = 1;
 // Object to hold each bingo board.
 const bingoBoards = {};
 
+// Array to contain the order of winning bingo boards.
+let winningOrderOfBingoBoards = [];
+
 // Create interface for reading data from puzzle-input.txt.
 const lineReader = createInterface({
   input: createReadStream('./puzzle-input.txt')
@@ -41,7 +44,7 @@ lineReader.on('line', (line) => {
 
 // Output answer to terminal.
 lineReader.on('close', () => {
-  console.log(getFinalScoreOfWinningBingoBoard());
+  console.log(getFinalScoreOfLastWinningBingoBoard());
 });
 
 // Logic to check if a win is detected from a row of a bingo board (multi-dimensional array).
@@ -84,35 +87,29 @@ const checkColumns = (bingoBoard) => {
   }
 };
 
-// Logic to get the winning bingo board by checking
-// each bingo board for either a win in one of its rows
-// or columns.
-const getWinningBingoBoard = () => {
-  for (const bingoBoard in bingoBoards) {
-    if (checkRows(bingoBoards[bingoBoard]) !== undefined) {
-      return checkRows(bingoBoards[bingoBoard]);
-    }
-
-    if (checkColumns(bingoBoards[bingoBoard]) !== undefined) {
-      return checkRows(bingoBoards[bingoBoard]);
-    }
-  }
-};
-
 // Logic to mark each bingo board with an 'x' if it has the current
-// drawing number. Returns the winning bingo board and the drawing number
-// that made it win if a winning board is detected after each drawing number
-// check.
+// drawing number. Pushes winning bingo boards and their winning drawing numbers
+// into the winningOrderOfBingoBoards array.
 const markBingoBoards = () => {
   for (const drawingNumber of drawingNumbers) {
     for (const bingoBoard in bingoBoards) {
-      for (let row = 0; row < bingoBoards[bingoBoard].length; row++) {
-        for (let position = 0; position < bingoBoards[bingoBoard][row].length; position++) {
-          if (bingoBoards[bingoBoard][row][position] === drawingNumber) {
-            bingoBoards[bingoBoard][row][position] = 'x';
+      if (checkRows(bingoBoards[bingoBoard]) === undefined && checkColumns(bingoBoards[bingoBoard]) === undefined) {
+        for (let row = 0; row < bingoBoards[bingoBoard].length; row++) {
+          if (checkRows(bingoBoards[bingoBoard]) === undefined && checkColumns(bingoBoards[bingoBoard]) === undefined) {
+            for (let position = 0; position < bingoBoards[bingoBoard][row].length; position++) {
+              if (checkRows(bingoBoards[bingoBoard]) === undefined && checkColumns(bingoBoards[bingoBoard]) === undefined) {
+                if (bingoBoards[bingoBoard][row][position] === drawingNumber) {
+                  bingoBoards[bingoBoard][row][position] = 'x';
 
-            if (getWinningBingoBoard() !== undefined) {
-              return { winningBoard: getWinningBingoBoard(), latestDrawingNumber: drawingNumber };
+                  if (checkRows(bingoBoards[bingoBoard]) !== undefined) {
+                    winningOrderOfBingoBoards.push({ winningBoard: checkRows(bingoBoards[bingoBoard]), latestDrawingNumber: drawingNumber });
+                  }
+
+                  if (checkColumns(bingoBoards[bingoBoard]) !== undefined) {
+                    winningOrderOfBingoBoards.push({ winningBoard: checkColumns(bingoBoards[bingoBoard]), latestDrawingNumber: drawingNumber });
+                  }
+                }
+              }
             }
           }
         }
@@ -121,16 +118,18 @@ const markBingoBoards = () => {
   }
 };
 
-// Logic to calculate and return the final score of a winning bingo board.
-const getFinalScoreOfWinningBingoBoard = () => {
-  const { winningBoard, latestDrawingNumber } = markBingoBoards();
+// Logic to calculate and return the final score of the winning bingo board.
+const getFinalScoreOfLastWinningBingoBoard = () => {
+  markBingoBoards();
+
+  const { winningBoard: lastWinningBoard, latestDrawingNumber } = winningOrderOfBingoBoards[winningOrderOfBingoBoards.length - 1];
 
   let finalScore = 0;
 
-  for (let row = 0; row < winningBoard.length; row++) {
-    for (let position = 0; position < winningBoard[row].length; position++) {
-      if (winningBoard[row][position] !== 'x') {
-        finalScore += parseInt(winningBoard[row][position]);
+  for (let row = 0; row < lastWinningBoard.length; row++) {
+    for (let position = 0; position < lastWinningBoard[row].length; position++) {
+      if (lastWinningBoard[row][position] !== 'x') {
+        finalScore += parseInt(lastWinningBoard[row][position]);
       }
     }
   }
