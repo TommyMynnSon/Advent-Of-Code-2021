@@ -30,6 +30,7 @@ lineReader.on('line', (line) => {
   numberOfHydrothermalVents++;
 });
 
+// Output answer.
 lineReader.on('close', () => {
   console.log('dangerous points:', getNumberOfDangerousPoints());
 });
@@ -78,15 +79,65 @@ const markPointsHorizontally = (hydrothermalVentLine) => {
   }
 };
 
+// Given the coordinates of a diagonal hydrothermal vent line, updates
+// the touchedPoints object.
+//
+// All variations of diagonals:
+// Positive slope hydrothermal vent line with a lower first point: (421, 667) -> (902, 186) | 421,667 - 422,666, 423,665 - ... - 902,186
+// Positive slope hydrothermal vent line with a higher first point: (939, 372) -> (354, 957) | 939,372 - 938,373 - 937,374 - ... - 354,957 
+// Negative slope hydrothermal vent line with a lower first point: (313, 762) -> (198, 647) | 313,762 - 312,761 - 311,760 - ... - 198,647
+// Negative slope hydrothermal vent line with a higher first point: (380, 148) -> (631, 399) |  380,148 - 381,149 - 382,150 - ... - 631,399
+const markPointsDiagonally = (hydrothermalVentLine) => {
+  if (hydrothermalVentLine[0][0] < hydrothermalVentLine[1][0] && hydrothermalVentLine[0][1] > hydrothermalVentLine[1][1]) {
+    for (let i = 0; i <= hydrothermalVentLine[1][0] - hydrothermalVentLine[0][0]; i++) {
+      if (touchedPoints[[hydrothermalVentLine[0][0] + i, hydrothermalVentLine[0][1] - i].toString()] === undefined) {
+        touchedPoints[[hydrothermalVentLine[0][0] + i, hydrothermalVentLine[0][1] - i].toString()] = 1;
+      } else {
+        touchedPoints[[hydrothermalVentLine[0][0] + i, hydrothermalVentLine[0][1] - i].toString()]++;
+      }
+    }
+  }
+
+  if (hydrothermalVentLine[0][0] > hydrothermalVentLine[1][0] && hydrothermalVentLine[0][1] < hydrothermalVentLine[1][1]) {
+    for (let i = 0; i <= hydrothermalVentLine[0][0] - hydrothermalVentLine[1][0]; i++) {
+      if (touchedPoints[[hydrothermalVentLine[0][0] - i, hydrothermalVentLine[0][1] + i].toString()] === undefined) {
+        touchedPoints[[hydrothermalVentLine[0][0] - i, hydrothermalVentLine[0][1] + i].toString()] = 1;
+      } else {
+        touchedPoints[[hydrothermalVentLine[0][0] - i, hydrothermalVentLine[0][1] + i].toString()]++;
+      }
+    }
+  }
+
+  if (hydrothermalVentLine[0][0] > hydrothermalVentLine[1][0] && hydrothermalVentLine[0][1] > hydrothermalVentLine[1][1]) {
+    for (let i = 0; i <= hydrothermalVentLine[0][0] - hydrothermalVentLine[1][0]; i++) {
+      if (touchedPoints[[hydrothermalVentLine[0][0] - i, hydrothermalVentLine[0][1] - i].toString()] === undefined) {
+        touchedPoints[[hydrothermalVentLine[0][0] - i, hydrothermalVentLine[0][1] - i].toString()] = 1;
+      } else {
+        touchedPoints[[hydrothermalVentLine[0][0] - i, hydrothermalVentLine[0][1] - i].toString()]++;
+      }
+    }
+  }
+
+  if (hydrothermalVentLine[0][0] < hydrothermalVentLine[1][0] && hydrothermalVentLine[0][1] < hydrothermalVentLine[1][1]) {
+    for (let i = 0; i <= hydrothermalVentLine[1][0] - hydrothermalVentLine[0][0]; i++) {
+      if (touchedPoints[[hydrothermalVentLine[0][0] + i, hydrothermalVentLine[0][1] + i].toString()] === undefined) {
+        touchedPoints[[hydrothermalVentLine[0][0] + i, hydrothermalVentLine[0][1] + i].toString()] = 1;
+      } else {
+        touchedPoints[[hydrothermalVentLine[0][0] + i, hydrothermalVentLine[0][1] + i].toString()]++;
+      }
+    }
+  }
+};
+
 // Logic to update the touchedPoints object with the number of times that each point gets touched by hydrothermal vent lines.
 const trackTouchedPoints = () => {
   for (const line in hydrothermalVentLines) {
     if (hydrothermalVentLines[line][0][0] === hydrothermalVentLines[line][1][0]) {
       markPointsVertically(hydrothermalVentLines[line]);
-    }
-
-    if (hydrothermalVentLines[line][0][1] === hydrothermalVentLines[line][1][1]) {
+    } else if (hydrothermalVentLines[line][0][1] === hydrothermalVentLines[line][1][1]) {
       markPointsHorizontally(hydrothermalVentLines[line]);
+    } else {
+      markPointsDiagonally(hydrothermalVentLines[line]);
     }
   }
 };
